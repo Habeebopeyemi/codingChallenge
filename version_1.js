@@ -27,8 +27,8 @@
             0
         )
         
-        var questionArray = [mathQuestion,currentAffairs,englishQuestion]
-        var selectionAtRandom = Math.floor(Math.random() * (questionArray.length))
+        
+        
 
         //  console.log(questionArray)
         //  choosing question at random
@@ -43,21 +43,55 @@
         }
 
         // creating a prototype for checking answer
-        Question.prototype.answerChecker = function(ans){
+        Question.prototype.answerChecker = function(ans,callBack){
+            var sc
             if(ans === this.correct_answer){
                 console.log('Correct!')
+                sc = callBack(true)
             }else{
                 console.log('Wrong!')
+                sc = callBack(false)
+            }
+            this.displayScore(sc)
+        }
+
+        // creating a method in the Question constructor to display score
+        Question.prototype.displayScore = function(score){
+            console.log('Your score is: '+score)
+            console.log('------------------------------------')
+        }
+
+        var questionArray = [mathQuestion,currentAffairs,englishQuestion]
+
+        // using the power of CLOSURE to keep track of our scores
+        function score(){
+            var sc = 0
+            return function(correct){
+                // correct is expected to return a boolean value as set in the answerChecker prototype
+                if(correct){
+                    sc++
+                }
+                return sc
             }
         }
 
-        questionArray[selectionAtRandom].randomSelection()
-        // receiving answers from users
-        var submittedAnswer = prompt('Please input the correct answer number into the form below,thanks')
-        // converting the answer from string to integer
-        var submittedAnswer = parseInt(submittedAnswer)
+        var keepScore = score()
+        // function to post another question by default
+        function nextQuestion(){
+            var selectionAtRandom = Math.floor(Math.random() * (questionArray.length))
+            questionArray[selectionAtRandom].randomSelection()
+            // receiving answers from users
+            var submittedAnswer = prompt('Please input the correct answer number into the form below or quit the game by typing exit,thanks')
 
-        questionArray[selectionAtRandom].answerChecker(submittedAnswer)
+            // creating the game exit plan
+            if(submittedAnswer !== 'exit'){
+                // converting the answer from string to integer
+                var submittedAnswer = parseInt(submittedAnswer)
+                
+                questionArray[selectionAtRandom].answerChecker(submittedAnswer,keepScore)
+
+                nextQuestion()
+            }
+        }
+       nextQuestion()
 })()
-
-
